@@ -5,17 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Created - By Cuervita</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
-    
     <style>
         :root {
             --primary: #00f2ff; --bg: #050505; --accent: #ff00ff; 
             --chat-green: #00ff41; --danger: #ff0000; --shadow: rgba(0, 242, 255, 0.5);
         }
+
         body, html { margin: 0; padding: 0; background-color: var(--bg); color: white; font-family: 'Orbitron', sans-serif; overflow-x: hidden; }
         #particles-js { position: fixed; width: 100%; height: 100%; z-index: -1; }
         .container { display: flex; flex-direction: column; align-items: center; padding: 20px 10px; min-height: 100vh; }
+
         .nav-menu { margin-bottom: 25px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; z-index: 1000; }
         button {
             background: rgba(0,0,0,0.5); border: 1.5px solid var(--primary); color: var(--primary);
@@ -23,23 +22,32 @@
             font-size: 0.7rem; transition: 0.3s;
         }
         button:hover { background: var(--primary); color: black; box-shadow: 0 0 15px var(--primary); }
+
         .panel {
             background: rgba(0, 0, 0, 0.98); padding: 25px; border: 1px solid var(--primary);
             box-shadow: 0 0 15px var(--shadow); width: 95%; max-width: 450px; text-align: center; margin-bottom: 20px;
         }
+
+        /* Selectores de Fecha */
         .date-selects { display: flex; gap: 5px; justify-content: center; margin: 15px 0; }
         select { background: #111; color: #fff; border: 1px solid var(--primary); padding: 10px; font-family: 'Orbitron'; font-size: 0.8rem; }
-        #chat-display { height: 350px; border: 1px solid var(--primary); margin: 10px 0; padding: 10px; overflow-y: auto; background: #000; display: flex; flex-direction: column; }
+
+        /* Chat */
+        #chat-display { height: 350px; border: 1px solid var(--primary); margin: 10px 0; padding: 10px; overflow-y: auto; background: #000; }
         .msg { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px; }
         .msg img.pfp { width: 35px; height: 35px; border-radius: 50%; border: 1px solid var(--primary); object-fit: cover; }
-        .msg-txt { background: rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; font-size: 0.75rem; text-align: left; word-break: break-word; }
+        .msg-txt { background: rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; font-size: 0.75rem; text-align: left; }
         .chat-img { max-width: 100%; border-radius: 5px; margin-top: 5px; border: 1px solid var(--primary); }
+
+        /* Videos */
         .video-grid { display: grid; grid-template-columns: 1fr; gap: 20px; width: 100%; max-width: 800px; }
         .video-card { background: #000; border: 1px solid var(--primary); position: relative; width: 100%; }
-        video { width: 100% !important; height: auto !important; display: block; }
+        video { width: 100% !important; height: auto !important; display: block; z-index: 1; }
+
         input[type="text"], input[type="password"] {
             background: #111; color: #fff; border: 1px solid var(--primary); padding: 10px; margin: 5px; width: 80%; font-family: 'Orbitron';
         }
+
         .hidden { display: none !important; }
         body.owner-mode { --primary: var(--accent); }
         body.chat-mode { --primary: var(--chat-green); }
@@ -115,26 +123,15 @@
 
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
-        // --- CONFIGURACIÓN DE FIREBASE ---
-        const firebaseConfig = {
-            apiKey: "TU_API_KEY",
-            authDomain: "TU_PROYECTO.firebaseapp.com",
-            databaseURL: "https://TU_PROYECTO-default-rtdb.firebaseio.com",
-            projectId: "TU_PROYECTO",
-            storageBucket: "TU_PROYECTO.appspot.com",
-            messagingSenderId: "ID",
-            appId: "APP_ID"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
         let nick = ""; let mode = ""; let activeRoom = "";
+        let logsPublic = ""; let logsDirect = "";
         const mainVids = ["https://files.catbox.moe/5h90ie.mp4", "https://files.catbox.moe/raj6qu.mp4", "https://qu.ax/24BUB", "https://files.catbox.moe/woz4p2.mp4", "https://qu.ax/KKhtu", "https://files.catbox.moe/ltwwe0.mp4", "https://files.catbox.moe/sm22y2.mp4"];
 
         particlesJS("particles-js", { "particles": { "number": { "value": 40 }, "color": { "value": "#00f2ff" }, "line_linked": { "enable": true, "color": "#00f2ff" }, "move": { "speed": 1 } } });
 
         window.onload = () => {
             loadVideos(mainVids);
+            // Llenar selectores de fecha
             const d = document.getElementById('birth-day');
             for(let i=1; i<=31; i++) d.innerHTML += `<option value="${i}">${i}</option>`;
             const y = document.getElementById('birth-year');
@@ -143,7 +140,10 @@
 
         function hideAll() {
             document.getElementById('vid-cont').innerHTML = "";
-            document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
+            document.getElementById('sec-age').classList.add('hidden');
+            document.getElementById('sec-login').classList.add('hidden');
+            document.getElementById('sec-choice').classList.add('hidden');
+            document.getElementById('sec-chat').classList.add('hidden');
         }
 
         function goSection(sec) {
@@ -162,6 +162,22 @@
             }
         }
 
+        function verifyAge() {
+            const day = document.getElementById('birth-day').value;
+            const month = document.getElementById('birth-month').value;
+            const year = document.getElementById('birth-year').value;
+            const birth = new Date(year, month, day);
+            const today = new Date();
+            let age = today.getFullYear() - birth.getFullYear();
+            if (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) age--;
+
+            if (age >= 18) {
+                hideAll();
+                const v18 = ["https://files.catbox.moe/adx7yg.mp4", "https://files.catbox.moe/1ye1zy.mp4", "https://files.catbox.moe/3cb4y4.mp4", "https://files.catbox.moe/28zl96.mp4", "https://files.catbox.moe/nq1wo9.mp4", "https://files.catbox.moe/vuinlq.mp4", "https://files.catbox.moe/ostld5.mp4", "https://files.catbox.moe/cfg2xe.mp4", "https://files.catbox.moe/m5zmyx.mp4", "https://files.catbox.moe/rtzi8d.mp4", "https://files.catbox.moe/qk44pb.mp4", "https://files.catbox.moe/ndrpr3.mp4", "https://files.catbox.moe/zls1hs.mp4", "https://files.catbox.moe/6vi78s.mp4", "https://files.catbox.moe/noyu4h.mp4", "https://files.catbox.moe/8wa3he.mp4", "https://files.catbox.moe/vpp59m.mp4"];
+                loadVideos(v18);
+            } else { alert("Menor de edad."); location.reload(); }
+        }
+
         function checkAccess() {
             const u = document.getElementById('inp-user').value;
             const p = document.getElementById('inp-pass').value;
@@ -171,12 +187,12 @@
                 nick = "𓅨𝘾𝙪𝙚𝙧𝙫𝙞𝙩𝙖𓅨";
                 document.getElementById('sec-login').classList.add('hidden');
                 document.getElementById('sec-choice').classList.remove('hidden');
-                b.innerHTML = '<button onclick="openRoom(\'Publico\')">ENTRAR AL PÚBLICO</button><button onclick="openRoom(\'Directo\')">VER DIRECTOS</button>';
+                b.innerHTML = '<button onclick="openRoom(\'Público\')">ENTRAR AL PÚBLICO</button><button onclick="openRoom(\'Directo\')">VER DIRECTOS</button>';
             } else if (mode === 'user' && u === "Usuario" && p === "usuario11") {
-                nick = "User_" + Math.floor(Math.random()*999);
+                nick = "User_" + Math.floor(Math.random()*99);
                 document.getElementById('sec-login').classList.add('hidden');
                 document.getElementById('sec-choice').classList.remove('hidden');
-                b.innerHTML = '<button onclick="openRoom(\'Publico\')">CHAT PÚBLICO</button><button onclick="openRoom(\'Directo\')">HABLAR CON CUERVITA</button>';
+                b.innerHTML = '<button onclick="openRoom(\'Público\')">CHAT PÚBLICO</button><button onclick="openRoom(\'Directo\')">HABLAR CON CUERVITA</button>';
             } else { alert("Error."); }
         }
 
@@ -186,40 +202,7 @@
             document.getElementById('sec-chat').classList.remove('hidden');
             document.getElementById('chat-type').innerText = "CANAL: " + r;
             document.getElementById('my-name').value = nick;
-            
-            // ESCUCHAR MENSAJES EN TIEMPO REAL DESDE FIREBASE
-            db.ref('messages/' + r).on('value', (snapshot) => {
-                const display = document.getElementById('chat-display');
-                display.innerHTML = "";
-                const data = snapshot.val();
-                if(data) {
-                    Object.values(data).forEach(m => {
-                        let content = m.type === 'text' ? m.content : `<img src="${m.content}" class="chat-img">`;
-                        display.innerHTML += `<div class="msg"><img src="${m.pfp}" class="pfp"><div class="msg-txt"><b>${m.nick}</b><br>${content}</div></div>`;
-                    });
-                }
-                display.scrollTop = display.scrollHeight;
-            });
-        }
-
-        function sendMsg(type, input) {
-            const pfp = document.getElementById('my-pfp').src;
-            if (type === 'text') {
-                const val = document.getElementById('chat-input').value;
-                if(!val) return;
-                db.ref('messages/' + activeRoom).push({
-                    nick: nick, pfp: pfp, content: val, type: 'text', time: Date.now()
-                });
-                document.getElementById('chat-input').value = "";
-            } else if (type === 'image' && input.files[0]) {
-                const r = new FileReader();
-                r.onload = e => {
-                    db.ref('messages/' + activeRoom).push({
-                        nick: nick, pfp: pfp, content: e.target.result, type: 'image', time: Date.now()
-                    });
-                };
-                r.readAsDataURL(input.files[0]);
-            }
+            renderChat();
         }
 
         function loadVideos(list) {
@@ -230,27 +213,37 @@
             });
         }
 
+        function sendMsg(type, input) {
+            const pfp = document.getElementById('my-pfp').src;
+            if (type === 'text') {
+                const t = document.getElementById('chat-input').value;
+                if(!t) return;
+                addMsgToLog(`<div class="msg"><img src="${pfp}" class="pfp"><div class="msg-txt"><b>${nick}</b><br>${t}</div></div>`);
+                document.getElementById('chat-input').value = "";
+            } else if (type === 'image' && input.files[0]) {
+                const r = new FileReader();
+                r.onload = e => addMsgToLog(`<div class="msg"><img src="${pfp}" class="pfp"><div class="msg-txt"><b>${nick}</b><br><img src="${e.target.result}" class="chat-img"></div></div>`);
+                r.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function addMsgToLog(html) {
+            if(activeRoom === 'Público') logsPublic += html; else logsDirect += html;
+            renderChat();
+        }
+
+        function renderChat() {
+            const d = document.getElementById('chat-display');
+            d.innerHTML = activeRoom === 'Público' ? logsPublic : logsDirect;
+            d.scrollTop = d.scrollHeight;
+        }
+
         function updatePFP(i) {
             if (i.files[0]) {
                 const r = new FileReader();
                 r.onload = e => document.getElementById('my-pfp').src = e.target.result;
                 r.readAsDataURL(i.files[0]);
             }
-        }
-
-        function verifyAge() {
-            const day = document.getElementById('birth-day').value;
-            const month = document.getElementById('birth-month').value;
-            const year = document.getElementById('birth-year').value;
-            const birth = new Date(year, month, day);
-            const today = new Date();
-            let age = today.getFullYear() - birth.getFullYear();
-            if (today.getMonth() < birth.getMonth() || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) age--;
-            if (age >= 18) {
-                hideAll();
-                const v18 = ["https://files.catbox.moe/adx7yg.mp4", "https://files.catbox.moe/1ye1zy.mp4", "https://files.catbox.moe/3cb4y4.mp4", "https://files.catbox.moe/28zl96.mp4", "https://files.catbox.moe/nq1wo9.mp4", "https://files.catbox.moe/vuinlq.mp4", "https://files.catbox.moe/ostld5.mp4", "https://files.catbox.moe/cfg2xe.mp4", "https://files.catbox.moe/m5zmyx.mp4", "https://files.catbox.moe/rtzi8d.mp4", "https://files.catbox.moe/qk44pb.mp4", "https://files.catbox.moe/ndrpr3.mp4", "https://files.catbox.moe/zls1hs.mp4", "https://files.catbox.moe/6vi78s.mp4", "https://files.catbox.moe/noyu4h.mp4", "https://files.catbox.moe/8wa3he.mp4", "https://files.catbox.moe/vpp59m.mp4"];
-                loadVideos(v18);
-            } else { alert("Menor de edad."); location.reload(); }
         }
     </script>
 </body>
